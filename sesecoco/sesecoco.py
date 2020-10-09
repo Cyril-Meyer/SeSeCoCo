@@ -91,7 +91,7 @@ for cc_label in range(1, seg2_n_cc+1):
 print("Segmentation 1 (y_true)")
 print("Connected Components", seg1_n_cc)
 print("Correctly detected components", tp)
-print("Not detected components", fn)
+print("False negative components", fn)
 print("Under detected components (too small or not enough recall)", under_detected)
 print("Segmentation 2 (y_pred)")
 print("Connected Components", seg2_n_cc)
@@ -109,11 +109,11 @@ mpl_blue = matplotlib.colors.ListedColormap([0, 0, 1, 1])
 mpl_cyan = matplotlib.colors.ListedColormap([0, 1, 1, 1])
 
 plt.imshow(np.ones(seg1.shape), cmap='Paired')
-plt.imshow(np.ma.masked_where(seg_fn == 0, seg_tp), cmap=mpl_blue)
-plt.imshow(np.ma.masked_where(seg_fp == 0, seg_tp), cmap=mpl_red)
 plt.imshow(np.ma.masked_where(seg_un == 0, seg_tp), cmap=mpl_cyan)
 plt.imshow(np.ma.masked_where(seg_un_d == 0, seg_tp), cmap=mpl_orange)
 plt.imshow(np.ma.masked_where(seg_ov == 0, seg_tp), cmap=mpl_yellow)
+plt.imshow(np.ma.masked_where(seg_fn == 0, seg_tp), cmap=mpl_blue)
+plt.imshow(np.ma.masked_where(seg_fp == 0, seg_tp), cmap=mpl_red)
 plt.imshow(np.ma.masked_where(seg_tp == 0, seg_tp), cmap=mpl_green)
 
 
