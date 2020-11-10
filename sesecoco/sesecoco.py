@@ -36,6 +36,9 @@ class SeSeCoCoResult:
                 "False positive components " + str(self.fp) + "\n"
                 "Over detecting components (too large or not enough precision) " + str(self.over_detecting) + "\n")
 
+    def get_score(self):
+        return self.seg1_n_cc, self.tp, self.fn, self.under_detected, self.seg2_n_cc, self.fp, self.over_detecting
+
     def __add__(self, other):
         if not other.__class__ is SeSeCoCoResult:
             print("ERROR: both arguments must be SeSeCoCoResult")
@@ -157,5 +160,65 @@ def cmp(seg1, seg2, minimum_recall_tp=0.50, minimum_precision_fp=0.50, with_segm
         result.seg_ov = seg_ov
         result.seg_un = seg_un
         result.seg_un_d = seg_un_d
+
+    return result
+
+
+def fast_cmp(seg1, seg2, minimum_recall_tp=0.50, minimum_precision_fp=0.50):
+    # user parameters
+    param_minimum_recall_tp = minimum_recall_tp
+    param_minimum_precision_fp = minimum_precision_fp
+
+    # results
+    tp = 0
+    fp = 0
+    fn = 0
+    over_detecting = 0
+    under_detected = 0
+
+    if not (seg1.shape == seg2.shape):
+        print("ERROR: segmentation shape not equal")
+        return 1
+
+    # The argument 'neighbors' is deprecated, use 'connectivity' instead. For neighbors=8, use connectivity=2.
+    seg1_labels = skimage.measure.label(seg1, connectivity=2)
+    seg2_labels = skimage.measure.label(seg2, connectivity=2)
+    seg1_n_cc = seg1_labels.max()
+    seg2_n_cc = seg2_labels.max()
+
+    for cc_label in range(1, seg1_n_cc + 1):
+        # the current connected component
+        current_cc = ((seg1_labels == cc_label) * 1).astype(np.uint8)
+        # the union of connected components which have a non null intersection with current_cc
+        intersected_cc = current_cc * seg2
+        recall = np.sum(current_cc * intersected_cc) / np.sum(current_cc)
+
+        if np.sum(intersected_cc) == 0:
+            fn += 1
+        elif recall > param_minimum_recall_tp:
+            tp += 1
+        else:
+            under_detected += 1
+
+    for cc_label in range(1, seg2_n_cc + 1):
+        # the current connected component
+        current_cc = ((seg2_labels == cc_label) * 1).astype(np.uint8)
+        # the union of connected components which have a non null intersection with current_cc
+        intersected_cc = current_cc * seg1
+        precision = np.sum(current_cc * intersected_cc) / np.sum(current_cc)
+
+        if np.sum(intersected_cc) == 0:
+            fp += 1
+        elif precision < param_minimum_precision_fp:
+            over_detecting += 1
+
+    result = SeSeCoCoResult(minimum_recall_tp, minimum_precision_fp, False)
+    result.seg1_n_cc = seg1_n_cc
+    result.seg2_n_cc = seg2_n_cc
+    result.tp = tp
+    result.fp = fp
+    result.fn = fn
+    result.over_detecting = over_detecting
+    result.under_detected = under_detected
 
     return result

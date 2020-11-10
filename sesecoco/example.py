@@ -19,12 +19,27 @@ result1 = sesecoco.cmp(seg1, seg2, 0.40, 0.40, True)
 result2 = sesecoco.cmp(seg1, seg2, 0.40, 0.40, True)
 result3 = sesecoco.cmp(seg1, seg2, 0.80, 0.80, True)
 
+result4 = sesecoco.fast_cmp(seg1, seg2, 0.40, 0.40)
+result5 = sesecoco.fast_cmp(seg1, seg2, 0.40, 0.40)
+result6 = sesecoco.fast_cmp(seg1, seg2, 0.80, 0.80)
+
 print(result1)
 print(result2)
 print(result3)
 print(result1 + result2)
 # The following line will not work
 # print(result1 + result3)
+
+print(result4)
+print(result5)
+print(result6)
+
+print(result1.get_score())
+print(result2.get_score())
+print(result3.get_score())
+print(result4.get_score())
+print(result5.get_score())
+print(result6.get_score())
 
 # Graphical view of segmentation difference
 mpl_green = matplotlib.colors.ListedColormap([0, 1, 0, 1])
